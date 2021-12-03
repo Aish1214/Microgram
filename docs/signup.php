@@ -14,14 +14,19 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $result = $signup->evaluate($_POST);
 
     if($result != "") {
-        echo "<div style='background-color: white; width: 30px;height:30px>";
+
         echo "The following errors occured";
-        echo "</div>";
+
 
 
         echo $result;
 
+    }else{
+        header("Location: login.php");
+        die;
     }
+
+
 
         $first_name = $_POST['first_name'];
         $last_name = $_POST['last_name'];

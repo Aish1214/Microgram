@@ -7,14 +7,38 @@ class signup
     private $error = "";
     public  function evaluate($data)
     {
-        foreach ($data as $key => $value)
-        {
-            if(empty($value))
-            {
-                $this->error =  $this->error . $key . " is empty!";
+        foreach ($data as $key => $value) {
+            if (empty($value)) {
+                $this->error = $this->error . $key . " is empty!";
 
             }
+
+
+//
+//
+//            if ($key == "first_name") {
+//                if (is_numeric($value)) {
+//                    $this->error = $this->error . " firstname can't have numberical!!";
+//                }
+//
+////                if (strstr($value, " ")){
+////                    $this->error = $this->error . "first name can't have space";
+////                }
+//
+//            }
+//
+//
+//
+//            if ($key == "last_name")
+//            {
+//                if (is_numeric($value))
+//                {
+//                    $this->error = $this->error . "invalid last name!!";
+//                }
+//
+//            }
         }
+
 
         if($this->error == "")
         {
@@ -30,8 +54,8 @@ class signup
     {
 
 
-        $first_name = $data['first_name'];
-        $last_name = $data['last_name'];
+        $first_name = ucfirst($data['first_name']);
+        $last_name = ucfirst($data['last_name']);
         $gender = $data['gender'];
 
         $email = $data['email'];

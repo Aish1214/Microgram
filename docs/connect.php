@@ -19,7 +19,7 @@ class Database
     }
 
 
-    /** @noinspection PhpUnused */
+
     function read($query)
     {
 
@@ -29,13 +29,15 @@ class Database
 
         if(!$result)
         {
-            return false;
-        }else{
-            $data = false;
-            while($row = mysqli_fetch_assoc($result))
-            {
-                $data[] = $row;
-            }
+
+           return false;
+    }else{
+
+        $data = false;
+        while($row = mysqli_fetch_assoc($result))
+        {
+            $data[] = $row;
+        }
             return $data;
         }
     }
