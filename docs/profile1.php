@@ -1,97 +1,75 @@
-
-
 <?php
-session_start();
-
-//unset($_SESSION['microgram_userid']);
-
-
-include("connect.php");
-
-include("user.php");
-include ("login1.php");
-
-
-
-//check if user is logged in
-if(isset($_SESSION['microgram_userid'])   && is_numeric($_SESSION['microgram_userid'])) {
-    $id = $_SESSION['microgram_userid'];
-    $login = new Login();
-    $result = $login->check_login($id);
-
-    if ($result) {
-
-        //retrieve user data
-        $user = new User();
-        $user_data = $user->get_data($id);
-
-
-        if (!$user_data) {
-            header("Location: login.php");
-            die;
-        }
-    }
-        else {
-            header("Location: login.php");
-            die;
-        }
-
-    } else {
-        header("Location: login.php");
-        die;
-    }
+include("autocad.php");
+//echo "<pre>";
+//print_r($_GET);
+//echo "</pre>";
 
 
 //    print_r($user_data);
+//isset($_SESSION['microgram_userid']);
+$login = new Login();
+$user_data = $login->check_login($_SESSION['microgram_userid']);
+
+
+//$profile = new Profile();
+//
+//$profile_data = $profile->get_profile($_GET['id']);
+//
+//
+//if(is_array($profile_data))
+//{
+//    $user_data = $profile_data[0];
+//}
+//echo "<pre>";
+//print_r($profile_data);
+//echo "</pre>";
+
+//echo "<pre>";
+//print_r($_GET);
+//echo "</pre>";
+
+//posting starts here
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
 
 
+    $post = new Post();
+    $id = $_SESSION['microgram_userid'];
+    $result = $post->create_post($id, $_POST, $_FILES);
+
+    if ($result == "") {
+        header("Location: profile1.php");
+        die;
+
+    } else {
+        echo "The error has occured please check it once...";
+        echo $result;
+
+    }
+}
 
 
+//collecting posts
+
+$post = new Post();
+$id = $_SESSION['microgram_userid'];
+$posts = $post->get_posts($id);
 
 
+//collect friends
+$user = new User();
+$id = $_SESSION['microgram_userid'];
+$friends = $user->get_friends($id);
+
+$image_class = new Image();
 
 
 ?>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html style="font-size: 16px;" lang="en">
-  <head>
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <meta name="keywords" content="​​​​​">
@@ -99,211 +77,337 @@ if(isset($_SESSION['microgram_userid'])   && is_numeric($_SESSION['microgram_use
     <meta name="page_type" content="np-template-header-footer-from-plugin">
     <title>Microgram | Profile</title>
     <link rel="stylesheet" href="nicepage.css" media="screen">
-<link rel="stylesheet" href="Home.css" media="screen">
+    <link rel="stylesheet" href="Home.css" media="screen">
     <script class="u-script" type="text/javascript" src="jquery.js" defer=""></script>
     <script class="u-script" type="text/javascript" src="nicepage.js" defer=""></script>
     <meta name="generator" content="Nicepage 4.0.3, nicepage.com">
-    
-    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i">
-    <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
-    
-    
-    
-    
-<!--    <script type="application/ld+json">-->
-<!--		"@context": "https//schema.org",-->
-<!--		"@type": "Organization",-->
-<!--		"name": ""-->
-<!--}</script>-->
+
+    <link id="u-theme-google-font" rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i">
+    <link id="u-page-google-font" rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+
+
+    <!--    <script type="application/ld+json">-->
+    <!--		"@context": "https//schema.org",-->
+    <!--		"@type": "Organization",-->
+    <!--		"name": ""-->
+    <!--}</script>-->
     <meta name="theme-color" content="#478ac9">
     <meta property="og:title" content="Home">
     <meta property="og:type" content="website">
-  </head>
+</head>
 
-  <style>
+<style>
 
-      #blue_bar {
-          height: 90px;
-          background: rgb(2, 0, 36);
-          background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 19%, rgba(0, 212, 255, 1) 77%);;
-          margin-top: -10px;
-          margin-right: -10px;
-          margin-left: -10px;
-      }
+    #blue_bar {
+        height: 90px;
+        background: rgb(2, 0, 36);
+        background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 19%, rgba(0, 212, 255, 1) 77%);;
+        margin-top: -10px;
+        margin-right: -10px;
+        margin-left: -10px;
+    }
 
-      #search_box {
-          width: 400px;
-          height: 50px;
-          border-radius: 5px;
-          border: none;
-          padding: 4px;
-          font-size: 20px;
+    #search_box {
+        width: 400px;
+        height: 50px;
+        border-radius: 5px;
+        border: none;
+        padding: 4px;
+        font-size: 20px;
 
-          background-repeat: no-repeat;
-          background-position: right;
-            color:black;
-  </style>
-  <body class="u-body">
+        background-repeat: no-repeat;
+        background-position: right;
+        color: black;
+    }
 
-  <div id="blue_bar">
-      <div style="width:900px;margin:auto;font-size: 50px;color: whitesmoke;font-family: Footlight MT Light,serif;">
-          Microgram &nbsp &nbsp<label for="search_box"></label><input type="text" id="search_box" placeholder="Search for people">
+    textarea {
 
-  </div>
-    <section class="u-clearfix u-image u-shading u-section-1" id="sec-73f8" data-image-width="1280" data-image-height="720">
-      <div class="u-clearfix u-sheet u-sheet-1">
-        <img class="u-image u-image-circle u-image-1" src="images/selfie.jpg" alt="" data-image-width="840" data-image-height="859">
-        <h1 class="u-align-center u-custom-font u-font-playfair-display u-text u-text-1">  <?php echo $user_data['first_name'] . " " . $user_data['last_name'] ?>    <span style="font-weight: 700;">
+        width: 96%;
+        height: 91px;
+        margin-top: 30px;
+        margin-left: 20px;
+        font-size: 20px;
+        margin-right: -45px;
+        margin-bottom: 10px;
+        color: white;
+
+        background-color: #eec0c6;
+        background-image: linear-gradient(315deg, #eec0c6 0%, #7ee8fa 74%);
+
+    }
+
+    #post_button {
+        height: 40px;
+        margin-bottom: 30px;
+        width: 130px;
+        margin-top: 5px;
+        font-size: 20px;
+        margin-right: 30px;
+        font-family: FootLight MT Light;
+        font-weight: bold;
+        float: right;
+        text-align: center;
+
+    }
+
+    #post {
+        margin-left: 50px;
+        margin-top: -500px;
+
+
+    }
+
+    #post1_bar {
+        height: 600px;
+        width: 1000px;
+        background-color: whitesmoke;
+        margin-left: 100px;
+
+        background-image: url("images/backgroundpost.jpeg");
+        margin-top: 500px;
+
+
+
+    }
+    #textposting{
+        height: 200px;
+        width: 1000px;
+        background-color: whitesmoke;
+        margin-left: 100px;
+
+        background-image: url("images/backgroundpost.jpeg");
+        margin-top: 500px;
+
+
+    }
+
+    #button {
+        float: right;
+        margin-top: -60px;
+        margin-right: 13px;
+    }
+
+    #postwala {
+        background-image: url("images/beautiful.jpg");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        min-height: 800px;
+    }
+
+    #friendbar {
+        min-height: 50px;
+        flex: 1;
+        margin-top: 70px;
+        height: 400px;
+
+
+    }
+
+    #titlefriend {
+        font-weight: bold;
+        font-family: "Bookman Old Style";
+        font-size: 35px;
+        text-align: center;
+        margin-left: 20px;
+        color: whitesmoke;
+        margin-top: 30px;
+        margin-right: 20px;
+    }
+
+    #friends {
+
+
+        font-weight: bold;
+        /*color: whitesmoke;*/
+        font-size: 30px;
+        font-family: FootLight MT Light, serif;
+        color: black;
+        text-align: center;
+
+
+    }
+
+    #friends_img {
+
+        width: 192px;
+        border-top-left-radius: 50px;
+        border-top-right-radius: 50px;
+        border-bottom-right-radius: 50px;
+        border-bottom-left-radius: 50px;
+
+
+    }
+
+    #coverarea {
+        min-height: 559px;
+        background: url('./mountain.jpg');
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+    }
+</style>
+<body class="u-body" style="background-color: #5ca0f2;
+background-image: linear-gradient(315deg, #5ca0f2 0%, #f5f7f6 74%);
+
+">
+
+<?php
+include("header.php")
+?>
+
+
+
+<div id="coverarea">
+
+
+
+    <?php
+    $image = "cover.jpg";
+
+
+    if (file_exists($user_data['cover_image'])) {
+        $image = $image_class->get_thumb_cover($user_data['cover_image']);
+    }
+    ?>
+
+
+    <img src="<?php echo $image ?>"
+         style="width: 120%;margin-right: 50px;background-repeat: no-repeat;background-size: auto;" alt="$image">
+</div>
+
+
+<div id="coverarea">
+    <marquee behavior="scroll" direction="left" scrollamount="8">
+        <img src=
+             "log.png" style="width: 80%;height: 30%;"
+             alt="GeeksforGeeks logo">
+    </marquee>
+    <!--<img src="coverpage.jpg" style="width: 1000px;height:500px;margin-left: 170px;padding:10px;margin-bottom: 100px;" alt="ash">-->
+
+</div>
+
+
+<section class="u-clearfix u-image u-shading u-section-1" id="sec-73f8" data-image-width="1280"
+         data-image-height="720">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <?php
+        $image =  "usermale.jpg";
+        if($user_data['gender'] == "Female")
+        {
+            $image = "userfemale.jpg";
+
+
+        }
+
+        if (file_exists($user_data['profile_image'])) {
+            $image = $image_class->get_thumb_profile($user_data['profile_image']);
+        }
+        ?>
+        <img class="u-image u-image-circle u-image-1" src="<?php echo $image ?>" alt="" data-image-width="840"
+             data-image-height="859">
+        <h1 class="u-align-center u-custom-font u-font-playfair-display u-text u-text-1">  <?php echo $user_data['first_name'] . " " . $user_data['last_name'] ?>
+            <span style="font-weight: 300;color: yellow;font-size: 50px;background-color :#20bf55;
+background-image: linear-gradient(315deg, #20bf55 0%, #01baef 74%);border-radius: 20px;text-decoration: none
+;
+">
+                    <br>
+                    <a href="change_profile_image.php?change=profile">Change Image</a>
+                                    <br><br>
+                                    <a href="change_profile_image.php?change=cover">Change Cover</a>
             <span style="font-weight: 400;">
               <span style="font-weight: 700;"></span>
             </span>
           </span>
         </h1>
-        <a href="" class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-1">settings</a>
-        <a href="" class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-2">Timeline</a>
-        <a href=" " class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-3">Friends</a>
-        <a href=" " class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-4">Photos</a>
-        <a href=" " class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-5">BIO</a>
-      </div>
-      
-      
-      
-      
-      
-    </section>
-    <section class="u-clearfix u-image u-section-2" id="sec-4bef" data-image-width="1280" data-image-height="768">
-      <div class="u-clearfix u-sheet u-sheet-1">
+<!--        <a href=""-->
+<!--           class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-1">settings</a>-->
+<!--        <a href="timeline.php"-->
+<!--           class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-2">Timeline</a>-->
+<!--        <a href=" "-->
+<!--           class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-3">Friends</a>-->
+<!--        <a href=" "-->
+<!--           class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-4">Photos</a>-->
+<!--        <a href=" "-->
+<!--           class="u-border-none u-btn u-btn-round u-button-style u-gradient u-hover-custom-color-1 u-hover-feature u-none u-radius-50 u-btn-5">BIO</a>-->
+<!--    </div>-->
+
+
+</section>
+<section class="u-clearfix u-image u-section-2" id="sec-4bef" data-image-width="1280" data-image-height="768">
+    <div class="u-clearfix u-sheet u-sheet-1">
         <div class="u-expanded-width u-form u-form-1">
-          <form action="" method="POST" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" source="custom" name="form-1" style="padding: 10px;">
-            <input type="hidden" id="siteId" name="siteId" value="189294145">
-            <input type="hidden" id="pageId" name="pageId" value="27350821">
-            <div class="u-form-group u-form-message u-form-group-1">
-              <label for="message-4fe7" class="u-form-control-hidden u-label"></label>
-              <textarea placeholder="Whats in your mind ???" rows="4" cols="50" id="message-4fe7" name="message" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required=""></textarea>
+            <!--          <form method="post"  class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" source="custom" name="form-1" style="padding: 10px;">-->
+            <!--            <input type="hidden" id="siteId" name="siteId" value="189294145">-->
+            <!--            <input type="hidden" id="pageId" name="pageId" value="27350821">-->
+            <!--            <div class="u-form-group u-form-message u-form-group-1">-->
+            <!--              <label for="message-4fe7" class="u-form-control-hidden u-label"></label>-->
+            <!--              <textarea placeholder="Whats in your mind ???" rows="4" cols="50" id="message-4fe7" name="post" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required=""></textarea>-->
+            <!--            </div>-->
+            <!--            <div class="u-align-right u-form-group u-form-submit u-form-group-2">-->
+            <!--              <a href="" class="u-btn u-btn-submit u-button-style"><span class="u-icon u-icon-1"><svg class="u-svg-content" viewBox="0 0 52 52" x="0px" y="0px" style="width: 1em; height: 1em;"><g><path d="M26,0C11.664,0,0,11.663,0,26s11.664,26,26,26s26-11.663,26-26S40.336,0,26,0z M26,50C12.767,50,2,39.233,2,26-->
+            <!--		S12.767,2,26,2s24,10.767,24,24S39.233,50,26,50z"></path><path d="M38.252,15.336l-15.369,17.29l-9.259-7.407c-0.43-0.345-1.061-0.274-1.405,0.156c-0.345,0.432-0.275,1.061,0.156,1.406-->
+            <!--		l10,8C22.559,34.928,22.78,35,23,35c0.276,0,0.551-0.114,0.748-0.336l16-18c0.367-0.412,0.33-1.045-0.083-1.411-->
+            <!--		C39.251,14.885,38.62,14.922,38.252,15.336z" value="Post"></path>-->
+            <!--</g></svg><img alt=""></span>Post<br>-->
+            <!--              </a>-->
+            <!--              <input type="submit" value="Post" class="u-form-control-hidden">-->
+            <!--            </div>-->
+            <!--            <div class="u-form-send-message u-form-send-success"> Thank you! Your message has been sent. </div>-->
+            <!--            <div class="u-form-send-error u-form-send-message"> Unable to send your message. Please fix errors then try again. </div>-->
+            <!--            <input type="hidden" value="Post" name="recaptchaResponse">-->
+
+            <div>
+<!--                <form method="post" enctype="multipart/form-data">-->
+<!---->
+<!--                    <label>-->
+<!--                        <textarea name="post" placeholder="Whats on your mind"></textarea>-->
+<!---->
+<!--                    </label>-->
+<!---->
+<!--                    <input id="post_button" type="submit" value="Post">-->
+<!--                    <br>-->
+<!--                </form>-->
+
+                <form method="post" enctype="multipart/form-data">
+                    <label>
+                        <textarea name="post" placeholder="Whats on your mind"></textarea>
+
+                    </label>
+                    <input type="file" name="file"
+                           style="font-weight: bold;margin-left: 20px;font-family: FootLight MT Light, serif;color: whitesmoke;">
+                    <input id="post_button" type="submit" value="Post">
+                    <br>
+
+<!--                    <input id="post_button" type="submit" value="Post IMG">-->
+                    <br>
+                </form>
             </div>
-            <div class="u-align-right u-form-group u-form-submit u-form-group-2">
-              <a href="#" class="u-btn u-btn-submit u-button-style"><span class="u-icon u-icon-1"><svg class="u-svg-content" viewBox="0 0 52 52" x="0px" y="0px" style="width: 1em; height: 1em;"><g><path d="M26,0C11.664,0,0,11.663,0,26s11.664,26,26,26s26-11.663,26-26S40.336,0,26,0z M26,50C12.767,50,2,39.233,2,26
-		S12.767,2,26,2s24,10.767,24,24S39.233,50,26,50z"></path><path d="M38.252,15.336l-15.369,17.29l-9.259-7.407c-0.43-0.345-1.061-0.274-1.405,0.156c-0.345,0.432-0.275,1.061,0.156,1.406
-		l10,8C22.559,34.928,22.78,35,23,35c0.276,0,0.551-0.114,0.748-0.336l16-18c0.367-0.412,0.33-1.045-0.083-1.411
-		C39.251,14.885,38.62,14.922,38.252,15.336z"></path>
-</g></svg><img></span>&nbsp;Post<br>
-              </a>
-              <input type="submit" value="submit" class="u-form-control-hidden">
-            </div>
-            <div class="u-form-send-message u-form-send-success"> Thank you! Your message has been sent. </div>
-            <div class="u-form-send-error u-form-send-message"> Unable to send your message. Please fix errors then try again. </div>
-            <input type="hidden" value="" name="recaptchaResponse">
-          </form>
+
         </div>
-        <div class="u-expanded-width u-list u-list-1">
-          <div class="u-repeater u-repeater-1">
-            <div class="u-container-style u-hover-feature u-list-item u-repeater-item u-list-item-1">
-              <div class="u-container-layout u-similar-container u-container-layout-1">
-                <img class="u-image u-image-round u-radius-10 u-image-1" src="images/Dorami.jpg" alt="" data-image-width="266" data-image-height="190">
-                <h3 class="u-text u-text-default u-text-1"><span class="u-icon u-icon-2"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:#C03A2B;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path><path style="fill:#ED7161;" d="M6,18.078c-0.553,0-1-0.447-1-1c0-5.514,4.486-10,10-10c0.553,0,1,0.447,1,1s-0.447,1-1,1
-	c-4.411,0-8,3.589-8,8C7,17.631,6.553,18.078,6,18.078z"></path></svg><img></span>&nbsp;Dorami
-                </h3>
-              </div>
+        <div>
+            <div id="titlefriend">
+                FRIENDS
             </div>
-            <div class="u-container-style u-hover-feature u-list-item u-repeater-item u-list-item-2">
-              <div class="u-container-layout u-similar-container u-container-layout-2">
-                <img class="u-image u-image-round u-radius-10 u-image-2" src="images/Suniyo.jpg" alt="" data-image-width="259" data-image-height="194">
-                <h3 class="u-text u-text-default u-text-2">Suniyo</h3>
-              </div>
-            </div>
-            <div class="u-container-style u-hover-feature u-list-item u-repeater-item u-list-item-3">
-              <div class="u-container-layout u-similar-container u-container-layout-3">
-                <img class="u-image u-image-round u-radius-10 u-image-3" src="images/Doreamon.jpg" alt="" data-image-width="512" data-image-height="512">
-                <h3 class="u-text u-text-default u-text-3">Doreamon</h3>
-              </div>
-            </div>
-            <div class="u-container-style u-hover-feature u-list-item u-repeater-item u-list-item-4">
-              <div class="u-container-layout u-similar-container u-container-layout-4">
-                <img class="u-image u-image-round u-radius-10 u-image-4" src="images/Jiyan.jpg" alt="" data-image-width="225" data-image-height="225">
-                <h3 class="u-text u-text-default u-text-4">Jiyan</h3>
-              </div>
-            </div>
-          </div>
+
+            <?php
+            if ($friends) {
+                foreach ($friends as $FRIEND_ROW) {
+
+
+                    include("friend.php");
+
+                }
+            }
+            ?>
+
+
         </div>
-      </div>
-      
-      
-      
-      
-    </section>
-    <section class="u-clearfix u-image u-section-3" id="sec-7c65" data-image-width="1280" data-image-height="905">
-      <div class="u-clearfix u-sheet u-sheet-1">
-        <div class="u-list u-list-1">
-          <div class="u-repeater u-repeater-1">
-            <div class="u-container-style u-custom-item u-image u-list-item u-repeater-item u-image-1" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="" data-image-width="150" data-image-height="100">
-              <div class="u-container-layout u-similar-container u-container-layout-1">
-                <img class="u-align-left u-image u-image-circle u-image-2" src="images/Dorami1.jpg" alt="" data-image-width="266" data-image-height="190">
-                <h3 class="u-align-center u-text u-text-1">Hello connections. I am Dorami. My fav dish is lemon bread. I am Doreamon's sis.</h3>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-1"><span class="u-icon u-icon-1"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:currentColor;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path></svg><img></span>&nbsp;Comment
-                </a>
-                <a href="   " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-2"><span class="u-icon u-icon-2"><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" style="width: 1em; height: 1em;"><path d="M53.333,224C23.936,224,0,247.936,0,277.333V448c0,29.397,23.936,53.333,53.333,53.333h64 c12.011,0,23.061-4.053,32-10.795V224H53.333z"></path><path d="M512,304c0-12.821-5.077-24.768-13.888-33.579c9.963-10.901,15.04-25.515,13.653-40.725    c-2.496-27.115-26.923-48.363-55.637-48.363H324.352c6.528-19.819,16.981-56.149,16.981-85.333c0-46.272-39.317-85.333-64-85.333 c-22.165,0-37.995,12.48-38.677,12.992c-2.517,2.027-3.989,5.099-3.989,8.341v72.341l-61.44,133.099l-2.56,1.301v228.651    C188.032,475.584,210.005,480,224,480h195.819c23.232,0,43.563-15.659,48.341-37.269c2.453-11.115,1.024-22.315-3.861-32.043 c15.765-7.936,26.368-24.171,26.368-42.688c0-7.552-1.728-14.784-5.013-21.333C501.419,338.731,512,322.496,512,304z"></path></svg><img alt="good"></span>&nbsp;Like
-                </a>
-              </div>
-            </div>
-            <div class="u-container-style u-custom-item u-image u-list-item u-repeater-item u-image-3" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="" data-image-width="1500" data-image-height="1000">
-              <div class="u-container-layout u-similar-container u-container-layout-2">
-                <img class="u-align-left u-image u-image-circle u-image-4" src="images/Doreamon.jpg" alt="" data-image-width="512" data-image-height="512">
-                <h3 class="u-align-center u-text u-text-2">Hello Friends . This is Doreamon. I love to eat Doracakes and travel. I am scared of mouse.</h3>
-                <a href="   " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-3"><span class="u-icon u-icon-3"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:currentColor;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path></svg><img></span>&nbsp;​COMMENT
-                </a>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-4"><span class="u-icon u-icon-4"><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" style="width: 1em; height: 1em;"><path d="M53.333,224C23.936,224,0,247.936,0,277.333V448c0,29.397,23.936,53.333,53.333,53.333h64 c12.011,0,23.061-4.053,32-10.795V224H53.333z"></path><path d="M512,304c0-12.821-5.077-24.768-13.888-33.579c9.963-10.901,15.04-25.515,13.653-40.725    c-2.496-27.115-26.923-48.363-55.637-48.363H324.352c6.528-19.819,16.981-56.149,16.981-85.333c0-46.272-39.317-85.333-64-85.333 c-22.165,0-37.995,12.48-38.677,12.992c-2.517,2.027-3.989,5.099-3.989,8.341v72.341l-61.44,133.099l-2.56,1.301v228.651    C188.032,475.584,210.005,480,224,480h195.819c23.232,0,43.563-15.659,48.341-37.269c2.453-11.115,1.024-22.315-3.861-32.043 c15.765-7.936,26.368-24.171,26.368-42.688c0-7.552-1.728-14.784-5.013-21.333C501.419,338.731,512,322.496,512,304z"></path></svg><img></span>&nbsp;Like
-                </a>
-              </div>
-            </div>
-            <div class="u-container-style u-custom-item u-image u-list-item u-repeater-item u-image-5" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="" data-image-width="1500" data-image-height="1000">
-              <div class="u-container-layout u-similar-container u-container-layout-3">
-                <img class="u-align-left u-image u-image-circle u-image-6" src="images/Jiyan.jpg" alt="" data-image-width="225" data-image-height="225">
-                <h3 class="u-align-center u-text u-text-3">"Mai hu Jiyan. Meri aawaj hai suruli." Song by me. Hello friends I am Jiyan. I stay in USA.</h3>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-5"><span class="u-icon u-icon-5"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:currentColor;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path></svg><img></span>&nbsp;COmment
-                </a>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-6"><span class="u-icon u-icon-6"><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" style="width: 1em; height: 1em;"><path d="M53.333,224C23.936,224,0,247.936,0,277.333V448c0,29.397,23.936,53.333,53.333,53.333h64 c12.011,0,23.061-4.053,32-10.795V224H53.333z"></path><path d="M512,304c0-12.821-5.077-24.768-13.888-33.579c9.963-10.901,15.04-25.515,13.653-40.725    c-2.496-27.115-26.923-48.363-55.637-48.363H324.352c6.528-19.819,16.981-56.149,16.981-85.333c0-46.272-39.317-85.333-64-85.333 c-22.165,0-37.995,12.48-38.677,12.992c-2.517,2.027-3.989,5.099-3.989,8.341v72.341l-61.44,133.099l-2.56,1.301v228.651    C188.032,475.584,210.005,480,224,480h195.819c23.232,0,43.563-15.659,48.341-37.269c2.453-11.115,1.024-22.315-3.861-32.043 c15.765-7.936,26.368-24.171,26.368-42.688c0-7.552-1.728-14.784-5.013-21.333C501.419,338.731,512,322.496,512,304z"></path></svg><img></span>&nbsp;Like
-                </a>
-              </div>
-            </div>
-            <div class="u-container-style u-custom-item u-image u-list-item u-repeater-item u-image-7" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="" data-image-width="1500" data-image-height="1000">
-              <div class="u-container-layout u-similar-container u-container-layout-4">
-                <img class="u-align-left u-image u-image-circle u-image-8" src="images/Nobita.jpg" alt="" data-image-width="1200" data-image-height="848">
-                <h3 class="u-align-center u-text u-text-4">Hello. This is Nobita Nobi. You all would have heard my name. I live in Japan. I am 14 yrs old. I love<br>to read comics and love to swim.
-                </h3>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-7"><span class="u-icon u-icon-7"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:currentColor;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path></svg><img></span>&nbsp;Comment
-                </a>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-8"><span class="u-icon u-icon-8"><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" style="width: 1em; height: 1em;"><path d="M53.333,224C23.936,224,0,247.936,0,277.333V448c0,29.397,23.936,53.333,53.333,53.333h64 c12.011,0,23.061-4.053,32-10.795V224H53.333z"></path><path d="M512,304c0-12.821-5.077-24.768-13.888-33.579c9.963-10.901,15.04-25.515,13.653-40.725    c-2.496-27.115-26.923-48.363-55.637-48.363H324.352c6.528-19.819,16.981-56.149,16.981-85.333c0-46.272-39.317-85.333-64-85.333 c-22.165,0-37.995,12.48-38.677,12.992c-2.517,2.027-3.989,5.099-3.989,8.341v72.341l-61.44,133.099l-2.56,1.301v228.651    C188.032,475.584,210.005,480,224,480h195.819c23.232,0,43.563-15.659,48.341-37.269c2.453-11.115,1.024-22.315-3.861-32.043 c15.765-7.936,26.368-24.171,26.368-42.688c0-7.552-1.728-14.784-5.013-21.333C501.419,338.731,512,322.496,512,304z"></path></svg><img></span>&nbsp;Like
-                </a>
-              </div>
-            </div>
-            <div class="u-container-style u-custom-item u-image u-list-item u-repeater-item u-image-9" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="" data-image-width="1500" data-image-height="1000">
-              <div class="u-container-layout u-similar-container u-container-layout-5">
-                <img class="u-align-left u-image u-image-circle u-image-10" src="images/Suniyo.jpg" alt="" data-image-width="259" data-image-height="194">
-                <h3 class="u-align-center u-text u-text-5">Myself Suniyo. I stay in UK, USA and Singapore. I am studying in Amity University Mumbai. I love myself.</h3>
-                <a href="  " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-9"> &nbsp;<span class="u-icon u-icon-9"><svg class="u-svg-content" viewBox="0 0 50 50" x="0px" y="0px" style="width: 1em; height: 1em;"><path style="fill:currentColor;" d="M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543
-	c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503
-	c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z"></path></svg><img></span>&nbsp;COmment
-                </a>
-                <a href="    " class="u-btn u-btn-round u-button-style u-gradient u-none u-radius-4 u-text-body-alt-color u-btn-10"><span class="u-icon u-icon-10"><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" style="width: 1em; height: 1em;"><path d="M53.333,224C23.936,224,0,247.936,0,277.333V448c0,29.397,23.936,53.333,53.333,53.333h64 c12.011,0,23.061-4.053,32-10.795V224H53.333z"></path><path d="M512,304c0-12.821-5.077-24.768-13.888-33.579c9.963-10.901,15.04-25.515,13.653-40.725    c-2.496-27.115-26.923-48.363-55.637-48.363H324.352c6.528-19.819,16.981-56.149,16.981-85.333c0-46.272-39.317-85.333-64-85.333 c-22.165,0-37.995,12.48-38.677,12.992c-2.517,2.027-3.989,5.099-3.989,8.341v72.341l-61.44,133.099l-2.56,1.301v228.651    C188.032,475.584,210.005,480,224,480h195.819c23.232,0,43.563-15.659,48.341-37.269c2.453-11.115,1.024-22.315-3.861-32.043 c15.765-7.936,26.368-24.171,26.368-42.688c0-7.552-1.728-14.784-5.013-21.333C501.419,338.731,512,322.496,512,304z"></path></svg><img></span>&nbsp;Like
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    
+
+
+</section>
+
+
 <!--    -->
 <!--    <section class="u-backlink u-clearfix u-grey-80">-->
 <!--      <a class="u-link" href="https://nicepage.com/website-templates" target="_blank">-->
@@ -316,5 +420,32 @@ if(isset($_SESSION['microgram_userid'])   && is_numeric($_SESSION['microgram_use
 <!--        <span>Website Builder Software</span>-->
 <!--      </a>. -->
 <!--    </section>-->
-  </body>
+
+
+<div id="postwala">
+    <div class="u-clearfix u-image u-section-3" id="sec-7c65" data-image-width="1280" data-image-height="905">
+        <div class="u-clearfix u-sheet u-sheet-1" style="margin-bottom: 10px;">
+
+
+            <!-- post 1 -->
+
+
+            <?php
+            if ($posts) {
+                foreach ($posts as $ROW) {
+
+                    $user = new User();
+                    $ROW_USER = $user->get_user($ROW['userid']);
+                    include("posts.php");
+
+                }
+            }
+            ?>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
 </html>

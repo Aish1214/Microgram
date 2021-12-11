@@ -1,3 +1,31 @@
+<?php
+
+session_start();
+include("connect.php");
+
+include("user.php");
+include("login1.php");
+include("post.php");
+
+
+
+//    print_r($user_data);
+//isset($_SESSION['microgram_userid']);
+$login = new Login();
+$user_data = $login->check_login($_SESSION['microgram_userid']);
+
+
+
+?>
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -159,7 +187,12 @@ background: linear-gradient(90deg, rgba(2,0,36,1) 1%, rgba(0,212,255,1) 49%, rgb
 	<div id="blue_bar">
 		<div style="width:900px;margin: auto;font-size: 50px;color: whitesmoke;font-family: Footlight MT Light;">
 			Microgram  &nbsp &nbsp<input type="text" id="search_box" placeholder="Search for people">
-			<img src="selfie.jpg" style="width:70px;float:right;"></div>
+
+            <a href="profile1.php">
+			<img src="selfie.jpg" style="width:70px;float:right;">
+            </a>
+
+        </div>
 	</div>
 
 	<!-- cover page
@@ -175,11 +208,18 @@ background: linear-gradient(90deg, rgba(2,0,36,1) 1%, rgba(0,212,255,1) 49%, rgb
  				<div id="friend_bar">
 
  					<img src="selfie.jpg" id="profile_pic">
- 					Shizuka Thomas
+                    <a href="profile1.php" style="color: whitesmoke;text-decoration: none;">
+
+
+
+                      <?php echo $user_data['first_name'] . " " . $user_data['last_name']?>
+
+                    </a>
  					
  				</div>
  			</div>
  			<!-- postarea -->
+
  			<div style="min-height: 400px;flex:2.5;"></div>
  				
  				<textarea placeholder="Whats on your mind?"></textarea>
